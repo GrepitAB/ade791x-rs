@@ -1,0 +1,17 @@
+[package]
+authors = ["Matteo Carnelos <matteo.carnelos@grepit.se>"]
+categories = ["embedded", "hardware-support", "no-std"]
+description = "Driver for the ADE7912/ADE7913 3-Channel, Isolated, Sigma-Delta ADC with SPI"
+keywords = ["adc", "embedded-hal-driver"]
+license = "MIT OR Apache-2.0"
+name = "ade791x"
+readme = "README.md"
+repository = "https://github.com/GrepitAB/ade791x-rs"
+version = "0.3.0"
+edition = "2021"
+
+[dependencies]
+embedded-hal = { version  = "0.2", features = ["unproven"] }
+
+[dev-dependencies]
+embedded-hal-mock = "0.8"
