@@ -36,18 +36,15 @@ The followings are two minimal examples to get readings from the ADC, both in a 
 ```rust
 use ade791x::*;
 
-// Execute this routine during initialization.
-fn init() {
-    let config = Config::default();
-    let calibration = Calibration::default();
-    let mut adc = Ade791x::new_ade7912(spi, cs);
-    adc.init(timer, config, calibration).unwrap();
-}
+// Initialization
+let config = Config::default();
+let calibration = Calibration::default();
+let mut adc = Ade791x::new_ade7912(spi, cs);
+adc.init(delay, config, calibration).unwrap();
 
-// Execute this routine in the DREADY ISR to get measurements as soon as they are ready.
-fn measure() {
-    let measurement = adc.get_measurement().unwrap();
-}
+// Measurement
+// Run the following in the DREADY ISR to get measurements as soon as they are ready
+let measurement = adc.get_measurement().unwrap();
 ```
 
 ### Poly
@@ -55,35 +52,30 @@ fn measure() {
 ```rust
 use ade791x::*;
 
-// Execute this routine during initialization.
-fn init() {
-    let config = [
-        Config { clkout_en: true, ..Default::default() },
-        Config { clkout_en: true, ..Default::default() },
-        Config::default()
-    ];
-    let calibration = [Calibration::default(); 3];
-    let emi_ctrl = [
-        ade791x::EmiCtrl::from(0x55),
-        ade791x::EmiCtrl::from(0xAA),
-        ade791x::EmiCtrl::from(0x55)
-    ];
-    let mut adc = poly::Ade791x::new(spi, [
-        (cs0, Chip::ADE7912), (cs1, Chip::ADE7913), (cs2, Chip::ADE7912)
-    ]);
-    adc.init(timer, config, calibration, emi_ctrl).unwrap();
-}
+// Initialization
+let config = [
+    Config { clkout_en: true, ..Default::default() },
+    Config { clkout_en: true, ..Default::default() },
+    Config::default()
+];
+let calibration = [Calibration::default(); 3];
+let emi_ctrl = [
+    ade791x::EmiCtrl::from(0x55),
+    ade791x::EmiCtrl::from(0xAA),
+    ade791x::EmiCtrl::from(0x55)
+];
+let mut adc = poly::Ade791x::new(spi, [
+    (cs0, Chip::ADE7912), (cs1, Chip::ADE7913), (cs2, Chip::ADE7912)
+]);
+adc.init(delay, config, calibration, emi_ctrl).unwrap();
 
-// Execute this routine every couple of seconds to ensure that the ADCs are always in sync.
-fn sync() {
-    adc.ajust_sync().unwrap();
-}
+// Synchronization
+// Execute the following every couple of seconds to ensure that the ADCs are always in sync
+adc.ajust_sync().unwrap();
 
-// Execute this routine in the DREADY ISR to get measurements as soon as they are ready.
-fn read() {
-    let measurement = adc.get_measurement().unwrap();
-}
-
+// Measurement
+// Run the following in the DREADY ISR to get measurements as soon as they are ready
+let measurement = adc.get_measurement().unwrap();
 ```
 
 ## Status
