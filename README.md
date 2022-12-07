@@ -1,5 +1,9 @@
 # Rust ADE791x 3-Channel, Isolated, Sigma-Delta ADC with SPI Driver 
 
+![crates.io](https://img.shields.io/crates/v/ade791x)
+![docs.rs](https://img.shields.io/docsrs/ade791x)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/GrepitAB/ade791x-rs/Cargo)
+
 This is a platform-agnostic Rust driver for the ADE7912/ADE7913 3-Channel, Isolated, Sigma-Delta ADC with SPI, using the [`embedded-hal`](https://github.com/rust-embedded/embedded-hal) traits.
 
 This driver allows you to:
@@ -9,6 +13,8 @@ This driver allows you to:
 - Powerdown/wakeup the device.
 - Get raw and converted measurements from the ADC.
 - Manage multiple ADCs configured in a polyphase metering system (see the `poly` module).
+
+### [Documentation](https://docs.rs/ade791x)
 
 ## The devices
 
