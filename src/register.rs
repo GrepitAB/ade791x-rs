@@ -50,14 +50,14 @@ impl From<u8> for Config {
     }
 }
 
-impl Into<u8> for Config {
-    fn into(self) -> u8 {
-        (self.bw as u8) << 7 |
-            (self.swrst as u8) << 6 |
-            (self.adc_freq as u8) << 4 |
-            (self.temp_en as u8) << 3 |
-            (self.pwrdwn_en as u8) << 2 |
-            (self.clkout_en as u8)
+impl From<Config> for u8 {
+    fn from(x: Config) -> Self {
+        (x.bw as u8) << 7 |
+            (x.swrst as u8) << 6 |
+            (x.adc_freq as u8) << 4 |
+            (x.temp_en as u8) << 3 |
+            (x.pwrdwn_en as u8) << 2 |
+            (x.clkout_en as u8)
     }
 }
 
@@ -138,16 +138,16 @@ impl From<u8> for EmiCtrl {
     }
 }
 
-impl Into<u8> for EmiCtrl {
-    fn into(self) -> u8 {
-        (self.slot7 as u8) << 7 |
-            (self.slot6 as u8) << 6 |
-            (self.slot5 as u8) << 5 |
-            (self.slot4 as u8) << 4 |
-            (self.slot3 as u8) << 3 |
-            (self.slot2 as u8) << 2 |
-            (self.slot1 as u8) << 1 |
-            (self.slot0 as u8)
+impl From<EmiCtrl> for u8 {
+    fn from(x: EmiCtrl) -> Self {
+        (x.slot7 as u8) << 7 |
+            (x.slot6 as u8) << 6 |
+            (x.slot5 as u8) << 5 |
+            (x.slot4 as u8) << 4 |
+            (x.slot3 as u8) << 3 |
+            (x.slot2 as u8) << 2 |
+            (x.slot1 as u8) << 1 |
+            (x.slot0 as u8)
     }
 }
 
@@ -163,9 +163,9 @@ pub(crate) struct SyncSnap {
     pub snap: bool
 }
 
-impl Into<u8> for SyncSnap {
-    fn into(self) -> u8 {
-        (self.snap as u8) << 1 | (self.sync as u8)
+impl From<SyncSnap> for u8 {
+    fn from(x: SyncSnap) -> Self {
+        (x.snap as u8) << 1 | (x.sync as u8)
     }
 }
 

@@ -197,7 +197,7 @@ impl<SPI, CS, S, P> Ade791x<SPI, CS>
 }
 
 /// Contains the raw values coming from the ADC.
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct RawMeasurement {
     /// Raw current channel value.
     pub iwv: i32,
@@ -274,7 +274,7 @@ impl Default for CalibrationGain {
 }
 
 /// Represents the chips of the ADE791x family.
-#[derive(PartialEq)]
+#[derive(PartialEq, Eq)]
 pub enum Chip {
     ADE7912,
     ADE7913
@@ -282,7 +282,7 @@ pub enum Chip {
 
 /// Represents the possible errors.
 #[repr(u8)]
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Error<S, P> {
     SpiError(S),
     PinError(P),

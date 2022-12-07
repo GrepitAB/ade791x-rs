@@ -110,7 +110,7 @@ impl<SPI, CS, S, P> Ade791x<SPI, CS>
     /// # Arguments
     /// * `spi` - The SPI interface implementing the [`spi::Transfer`] trait.
     pub fn powerdown(&mut self, spi: &mut SPI) -> Result<(), Error<S, P>> {
-        let mut config = self.config.clone();
+        let mut config = self.config;
         config.pwrdwn_en = true;
         config.clkout_en = false;
         self.write_reg(spi, Register::Config, config.into())
@@ -168,7 +168,7 @@ impl<SPI, CS, S, P> Ade791x<SPI, CS>
         };
         let c = self.get_cnt_snapshot(spi)?;
         let drift = c as i16 - cref as i16;
-        if drift > 1 || drift < -1 {
+        if !(-1..=1).contains(&drift) {
             let adj = if c > cref { cref + c0 - c } else { cref - c };
             let bytes = adj.to_be_bytes();
             self.write_reg(spi, Register::Counter0, bytes[1])?;

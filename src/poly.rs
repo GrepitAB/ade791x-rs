@@ -103,9 +103,9 @@ impl<SPI, CS, S, P, const N: usize> Ade791x<SPI, CS, N>
         let ref_adc_index = self.adcs.iter().position(|adc| adc.is_dr_source()).unwrap_or(0);
         let cref = self.adcs[ref_adc_index].get_cnt_snapshot(&mut self.spi)?;
         let mut drift = [0; N];
-        for i in 0..N {
+        for (i, val) in drift.iter_mut().enumerate() {
             if i == ref_adc_index { continue; }
-            drift[i] = self.adcs[i].adjust_sync(&mut self.spi, cref)?;
+            *val = self.adcs[i].adjust_sync(&mut self.spi, cref)?;
         }
         self.lock()?;
         Ok(drift)
@@ -122,8 +122,8 @@ impl<SPI, CS, S, P, const N: usize> Ade791x<SPI, CS, N>
             v1wv: 0,
             v2wv: 0
         }; N];
-        for i in 0..N {
-            raw_measurement[i] = self.adcs[i].get_raw_measurement(&mut self.spi)?;
+        for (i, val) in raw_measurement.iter_mut().enumerate() {
+            *val = self.adcs[i].get_raw_measurement(&mut self.spi)?;
         }
         Ok(raw_measurement)
     }
@@ -138,8 +138,8 @@ impl<SPI, CS, S, P, const N: usize> Ade791x<SPI, CS, N>
             voltage: 0.0,
             aux: MeasurementAux::Voltage(0.0)
         }; N];
-        for i in 0..N {
-            measurement[i] = self.adcs[i].get_measurement(&mut self.spi)?;
+        for (i, val) in measurement.iter_mut().enumerate() {
+            *val = self.adcs[i].get_measurement(&mut self.spi)?;
         }
         Ok(measurement)
     }
