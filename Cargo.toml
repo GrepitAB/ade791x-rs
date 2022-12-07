@@ -15,3 +15,6 @@ embedded-hal = { version  = "0.2", features = ["unproven"] }
 
 [dev-dependencies]
 embedded-hal-mock = "0.8"
+
+[profile.release]
+lto = true
