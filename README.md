@@ -1,8 +1,8 @@
 # Rust ADE791x 3-Channel, Isolated, Sigma-Delta ADC with SPI Driver 
 
-![crates.io](https://img.shields.io/crates/v/ade791x)
-![docs.rs](https://img.shields.io/docsrs/ade791x)
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/GrepitAB/ade791x-rs/Cargo)
+[![crates.io](https://img.shields.io/crates/v/ade791x)](https://crates.io/crates/ade791x)
+[![docs.rs](https://img.shields.io/docsrs/ade791x)](https://docs.rs/ade791x)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/GrepitAB/ade791x-rs/Cargo)](https://github.com/GrepitAB/ade791x-rs/actions/workflows/cargo.yml)
 
 This is a platform-agnostic Rust driver for the ADE7912/ADE7913 3-Channel, Isolated, Sigma-Delta ADC with SPI, using the [`embedded-hal`](https://github.com/rust-embedded/embedded-hal) traits.
 
