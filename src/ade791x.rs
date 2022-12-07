@@ -8,21 +8,27 @@ pub(crate) struct Ade791x<SPI, CS> {
     cs: CS,
     chip: Chip,
     config: Config,
-    calibration: Calibration
+    calibration: Calibration,
 }
 
 impl<SPI, CS, S, P> Ade791x<SPI, CS>
-    where
-        SPI: spi::Transfer<u8, Error=S>,
-        CS: OutputPin<Error = P> {
-
+where
+    SPI: spi::Transfer<u8, Error = S>,
+    CS: OutputPin<Error = P>,
+{
     /// Creates a new [`Ade791x`] instance, given the CS output pin. The newly created instance must
     /// be initialized using [`Self::init()`].
     /// # Arguments
     /// * `cs` - The CS output pin implementing the [`OutputPin`] trait.
     /// * `chip` - The chip version as a [`Chip`].
     pub fn new(cs: CS, chip: Chip) -> Self {
-        Self { _spi: PhantomData, chip, cs, config: Config::default(), calibration: Calibration::default() }
+        Self {
+            _spi: PhantomData,
+            chip,
+            cs,
+            config: Config::default(),
+            calibration: Calibration::default(),
+        }
     }
 
     /// Initializes the ADC, applying the given configuration. After this method, the ADC is ready
@@ -34,12 +40,14 @@ impl<SPI, CS, S, P> Ade791x<SPI, CS>
     /// * `calibration` - The [`Calibration`] struct containing the calibration values for the ADC.
     /// * `emi_ctrl` - The [`EmiCtrl`] struct containing the EMI settings for polyphase
     /// configurations.
-    pub fn init(&mut self,
-                spi: &mut SPI,
-                delay: &mut dyn DelayMs<u32>,
-                config: Config,
-                calibration: Calibration,
-                emi_ctrl: EmiCtrl) -> Result<(), Error<S, P>> {
+    pub fn init(
+        &mut self,
+        spi: &mut SPI,
+        delay: &mut dyn DelayMs<u32>,
+        config: Config,
+        calibration: Calibration,
+        emi_ctrl: EmiCtrl,
+    ) -> Result<(), Error<S, P>> {
         self.config = config;
         self.calibration = calibration;
         self.wait_reset(spi, delay)?;
@@ -48,13 +56,20 @@ impl<SPI, CS, S, P> Ade791x<SPI, CS>
         if self.calibration.offset.aux.is_none() {
             self.calibration.offset.aux = if self.config.temp_en || self.chip == Chip::ADE7912 {
                 Some(self.read_reg(spi, Register::Tempos)?[1] as i8 as f32)
-            } else { Some(0.0) };
+            } else {
+                Some(0.0)
+            };
         }
         if self.calibration.gain.aux.is_none() {
             self.calibration.gain.aux = if self.config.temp_en || self.chip == Chip::ADE7912 {
-                if self.config.bw { Some(8.21015e-5) }
-                else { Some(8.72101e-5) }
-            } else { Some(1.0) }
+                if self.config.bw {
+                    Some(8.21015e-5)
+                } else {
+                    Some(8.72101e-5)
+                }
+            } else {
+                Some(1.0)
+            }
         }
         Ok(())
     }
@@ -83,7 +98,10 @@ impl<SPI, CS, S, P> Ade791x<SPI, CS>
     /// # Arguments
     /// * `spi` - The SPI interface implementing the [`spi::Transfer`] trait.
     pub fn soft_reset(&mut self, spi: &mut SPI) -> Result<(), Error<S, P>> {
-        let config = Config { swrst: true, ..Default::default() };
+        let config = Config {
+            swrst: true,
+            ..Default::default()
+        };
         self.write_reg(spi, Register::Config, config.into())
     }
 
@@ -92,12 +110,14 @@ impl<SPI, CS, S, P> Ade791x<SPI, CS>
     /// # Arguments
     /// * `spi` - The SPI interface implementing the [`spi::Transfer`] trait.
     /// * `delay` - The delay source implementing the [`DelayMs`] trait.
-    pub fn wait_reset(&mut self,
-                      spi: &mut SPI,
-                      delay: &mut dyn DelayMs<u32>) -> Result<(), Error<S, P>> {
+    pub fn wait_reset(
+        &mut self,
+        spi: &mut SPI,
+        delay: &mut dyn DelayMs<u32>,
+    ) -> Result<(), Error<S, P>> {
         for _ in 0..5 {
             if !Status0::from(self.read_reg(spi, Register::Status0)?[1]).reset_on {
-                return Ok(())
+                return Ok(());
             }
             delay.delay_ms(100);
         }
@@ -138,7 +158,10 @@ impl<SPI, CS, S, P> Ade791x<SPI, CS>
     /// # Arguments
     /// * `spi` - The SPI interface implementing the [`spi::Transfer`] trait.
     pub fn sync(&mut self, spi: &mut SPI) -> Result<(), Error<S, P>> {
-        let sync = SyncSnap { sync: true, snap: false };
+        let sync = SyncSnap {
+            sync: true,
+            snap: false,
+        };
         self.write_reg(spi, Register::SyncSnap, sync.into())
     }
 
@@ -147,7 +170,10 @@ impl<SPI, CS, S, P> Ade791x<SPI, CS>
     /// # Arguments
     /// * `spi` - The SPI interface implementing the [`spi::Transfer`] trait.
     pub fn snap(&mut self, spi: &mut SPI) -> Result<(), Error<S, P>> {
-        let snap = SyncSnap { sync: false, snap: true };
+        let snap = SyncSnap {
+            sync: false,
+            snap: true,
+        };
         self.write_reg(spi, Register::SyncSnap, snap.into())
     }
 
@@ -164,7 +190,7 @@ impl<SPI, CS, S, P> Ade791x<SPI, CS>
             AdcFreqVal::KHz8 => 511,
             AdcFreqVal::KHz4 => 1023,
             AdcFreqVal::KHz2 => 2047,
-            AdcFreqVal::KHz1 => 4095
+            AdcFreqVal::KHz1 => 4095,
         };
         let c = self.get_cnt_snapshot(spi)?;
         let drift = c as i16 - cref as i16;
@@ -207,7 +233,7 @@ impl<SPI, CS, S, P> Ade791x<SPI, CS>
         Ok(RawMeasurement {
             iwv: burst_read.iwv,
             v1wv: burst_read.v1wv,
-            v2wv: burst_read.v2wv
+            v2wv: burst_read.v2wv,
         })
     }
 
@@ -222,13 +248,20 @@ impl<SPI, CS, S, P> Ade791x<SPI, CS>
             current: Self::map_adc(raw_measurement.iwv, -49.27, 49.27),
             voltage: Self::map_adc(raw_measurement.v1wv, -788.0, 788.0),
             aux: if self.chip == Chip::ADE7912 || self.config.temp_en {
-                MeasurementAux::Temperature(aux_gain * raw_measurement.v2wv as f32 + 8.72101e-5 * aux_offset * 2048.0 - 306.47)
+                MeasurementAux::Temperature(
+                    aux_gain * raw_measurement.v2wv as f32 + 8.72101e-5 * aux_offset * 2048.0
+                        - 306.47,
+                )
             } else {
-                MeasurementAux::Voltage((Self::map_adc(raw_measurement.v2wv, -788.0, 788.0) - aux_offset) * aux_gain)
-            }
+                MeasurementAux::Voltage(
+                    (Self::map_adc(raw_measurement.v2wv, -788.0, 788.0) - aux_offset) * aux_gain,
+                )
+            },
         };
-        measurement.current = (measurement.current - self.calibration.offset.current) * self.calibration.gain.current;
-        measurement.voltage = (measurement.voltage - self.calibration.offset.voltage) * self.calibration.gain.voltage;
+        measurement.current =
+            (measurement.current - self.calibration.offset.current) * self.calibration.gain.current;
+        measurement.voltage =
+            (measurement.voltage - self.calibration.offset.voltage) * self.calibration.gain.voltage;
         Ok(measurement)
     }
 
@@ -251,7 +284,12 @@ impl<SPI, CS, S, P> Ade791x<SPI, CS>
     /// * `spi` - The SPI interface implementing the [`spi::Transfer`] trait.
     /// * `start_reg` - The starting register as a [`Register`] value.
     /// * `len` - The length of the transaction in terms of number of bytes received.
-    fn burst_read(&mut self, spi: &mut SPI, start_reg: Register, len: usize) -> Result<[u8; 15], Error<S, P>> {
+    fn burst_read(
+        &mut self,
+        spi: &mut SPI,
+        start_reg: Register,
+        len: usize,
+    ) -> Result<[u8; 15], Error<S, P>> {
         let start_index = match start_reg {
             Register::Iwv => 1,
             Register::V1wv => 4,
@@ -259,14 +297,15 @@ impl<SPI, CS, S, P> Ade791x<SPI, CS>
             Register::AdcCrc => 10,
             Register::Status0 => 12,
             Register::CntSnapshot => 13,
-            _ => return Err(Error::BurstReadNotPermitted)
+            _ => return Err(Error::BurstReadNotPermitted),
         };
         let mut bytes = [0; 15];
         bytes[0] = (start_reg.addr() << 3) | SpiOp::Read as u8;
         self.cs.set_low().map_err(Error::PinError)?;
-        spi.transfer(&mut bytes[..len+1]).map_err(Error::SpiError)?;
+        spi.transfer(&mut bytes[..len + 1])
+            .map_err(Error::SpiError)?;
         self.cs.set_high().map_err(Error::PinError)?;
-        bytes.copy_within(1..len+1, start_index);
+        bytes.copy_within(1..len + 1, start_index);
         bytes[1..start_index].fill(0);
         Ok(bytes)
     }
@@ -278,7 +317,9 @@ impl<SPI, CS, S, P> Ade791x<SPI, CS>
     /// * `spi` - The SPI interface implementing the [`spi::Transfer`] trait.
     /// * `reg` - The register as a [`Register`] value.
     fn read_reg(&mut self, spi: &mut SPI, reg: Register) -> Result<[u8; 2], Error<S, P>> {
-        if reg.is_write_only() { return Err(Error::WriteOnlyRegister) }
+        if reg.is_write_only() {
+            return Err(Error::WriteOnlyRegister);
+        }
         let mut bytes = [(reg.addr() << 3) | SpiOp::Read as u8, 0];
         self.cs.set_low().map_err(Error::PinError)?;
         spi.transfer(&mut bytes).map_err(Error::SpiError)?;
@@ -293,7 +334,9 @@ impl<SPI, CS, S, P> Ade791x<SPI, CS>
     /// * `reg` - The register as a [`Register`] value.
     /// * `content` - The content to write to the register as an `u8` value.
     fn write_reg(&mut self, spi: &mut SPI, reg: Register, content: u8) -> Result<(), Error<S, P>> {
-        if reg.is_read_only() { return Err(Error::ReadOnlyRegister) }
+        if reg.is_read_only() {
+            return Err(Error::ReadOnlyRegister);
+        }
         let mut bytes = [(reg.addr() << 3) | SpiOp::Write as u8, content];
         self.cs.set_low().map_err(Error::PinError)?;
         spi.transfer(&mut bytes).map_err(Error::SpiError)?;
@@ -308,7 +351,12 @@ impl<SPI, CS, S, P> Ade791x<SPI, CS>
     /// * `spi` - The SPI interface implementing the [`spi::Transfer`] trait.
     /// * `reg` - The register as a [`Register`] value.
     /// * `content` - The content to write to the register as an `u8` value.
-    fn write_reg_checked(&mut self, spi: &mut SPI, reg: Register, content: u8) -> Result<(), Error<S, P>> {
+    fn write_reg_checked(
+        &mut self,
+        spi: &mut SPI,
+        reg: Register,
+        content: u8,
+    ) -> Result<(), Error<S, P>> {
         self.write_reg(spi, reg, content)?;
         if self.read_reg(spi, reg)?[1] != content {
             return Err(Error::RegisterContentMismatch);

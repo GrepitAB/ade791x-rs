@@ -103,20 +103,20 @@ use embedded_hal::digital::v2::OutputPin;
 
 pub use register::*;
 
+mod ade791x;
 pub mod poly;
 mod register;
-mod ade791x;
 
 /// Represents a single ADE7912/ADE7913 3-Channel, Isolated, Sigma-Delta ADC with SPI.
 pub struct Ade791x<SPI, CS> {
-    adc: poly::Ade791x<SPI, CS, 1>
+    adc: poly::Ade791x<SPI, CS, 1>,
 }
 
 impl<SPI, CS, S, P> Ade791x<SPI, CS>
-    where
-        SPI: spi::Transfer<u8, Error=S>,
-        CS: OutputPin<Error=P> {
-
+where
+    SPI: spi::Transfer<u8, Error = S>,
+    CS: OutputPin<Error = P>,
+{
     /// Creates a new [`Ade791x`] instance representing a ADE7912 chip, given the SPI peripheral and
     /// the CS output pin. The newly created instance must be initialized using [`Self::init()`].
     /// # Arguments
@@ -124,7 +124,7 @@ impl<SPI, CS, S, P> Ade791x<SPI, CS>
     /// * `cs` - The CS output pin implementing the [`OutputPin`] trait.
     pub fn new_ade7912(spi: SPI, cs: CS) -> Self {
         Self {
-            adc: poly::Ade791x::new(spi, [(cs, Chip::ADE7912)])
+            adc: poly::Ade791x::new(spi, [(cs, Chip::ADE7912)]),
         }
     }
 
@@ -135,7 +135,7 @@ impl<SPI, CS, S, P> Ade791x<SPI, CS>
     /// * `cs` - The CS output pin implementing the [`OutputPin`] trait.
     pub fn new_ade7913(spi: SPI, cs: CS) -> Self {
         Self {
-            adc: poly::Ade791x::new(spi, [(cs, Chip::ADE7913)])
+            adc: poly::Ade791x::new(spi, [(cs, Chip::ADE7913)]),
         }
     }
 
@@ -145,11 +145,14 @@ impl<SPI, CS, S, P> Ade791x<SPI, CS>
     /// * `delay` - The delay source implementing the [`DelayMs`] trait.
     /// * `config` - The [`Config`] struct containing the configuration for the ADC.
     /// * `calibration` - The [`Calibration`] struct containing the calibration values for the ADC.
-    pub fn init(&mut self,
-                delay: &mut dyn DelayMs<u32>,
-                config: Config,
-                calibration: Calibration) -> Result<(), Error<S, P>> {
-        self.adc.init(delay, [config], [calibration], [EmiCtrl::default()])
+    pub fn init(
+        &mut self,
+        delay: &mut dyn DelayMs<u32>,
+        config: Config,
+        calibration: Calibration,
+    ) -> Result<(), Error<S, P>> {
+        self.adc
+            .init(delay, [config], [calibration], [EmiCtrl::default()])
     }
 
     /// Performs a hardware reset of the ADC. During a hardware reset, all the registers are set to
@@ -204,7 +207,7 @@ pub struct RawMeasurement {
     /// Raw voltage 1 channel value.
     pub v1wv: i32,
     /// Raw voltage 2 channel value.
-    pub v2wv: i32
+    pub v2wv: i32,
 }
 
 /// Contains the converted metrics coming from the ADC.
@@ -217,14 +220,14 @@ pub struct Measurement {
     /// Auxiliary metric value as a [`MeasurementAux`]. This field can be a second voltage
     /// measurement in Volts for the ADE7913 or a temperature measurement in °C for the ADE7912 or
     /// the ADE7913, if `temp_en = true` in [`Config`].
-    pub aux: MeasurementAux
+    pub aux: MeasurementAux,
 }
 
 /// Represents the possible auxiliary measurement metrics.
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum MeasurementAux {
     Voltage(f32),
-    Temperature(f32)
+    Temperature(f32),
 }
 
 /// Contains the calibration values for the ADC.
@@ -233,7 +236,7 @@ pub struct Calibration {
     /// Calibration offset as a [`CalibrationOffset`].
     pub offset: CalibrationOffset,
     /// Calibration gain as a [`CalibrationGain`].
-    pub gain: CalibrationGain
+    pub gain: CalibrationGain,
 }
 
 /// Contains the calibration offsets, that can be obtained by reading the ADC measurements with the
@@ -246,7 +249,7 @@ pub struct CalibrationOffset {
     pub voltage: f32,
     /// Calibration offset for the auxiliary channel. Set this field to [`None`] to automatically
     /// set the auxiliary offset based on the internal values.
-    pub aux: Option<f32>
+    pub aux: Option<f32>,
 }
 
 /// Contains the calibration multipliers, that can be obtained by applying a reference load and
@@ -260,7 +263,7 @@ pub struct CalibrationGain {
     pub voltage: f32,
     /// Calibration gain for the auxiliary channel. Set this field to [`None`] to automatically
     /// set the auxiliary offset based on the internal values.
-    pub aux: Option<f32>
+    pub aux: Option<f32>,
 }
 
 impl Default for CalibrationGain {
@@ -268,7 +271,7 @@ impl Default for CalibrationGain {
         Self {
             current: 1.0,
             voltage: 1.0,
-            aux: None
+            aux: None,
         }
     }
 }
@@ -277,7 +280,7 @@ impl Default for CalibrationGain {
 #[derive(PartialEq, Eq)]
 pub enum Chip {
     ADE7912,
-    ADE7913
+    ADE7913,
 }
 
 /// Represents the possible errors.
@@ -290,5 +293,5 @@ pub enum Error<S, P> {
     ReadOnlyRegister,
     WriteOnlyRegister,
     BurstReadNotPermitted,
-    RegisterContentMismatch
+    RegisterContentMismatch,
 }

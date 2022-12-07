@@ -1,7 +1,7 @@
 use ade791x::*;
-use embedded_hal_mock::spi::{Mock as SpiMock, Transaction as SpiTransaction};
-use embedded_hal_mock::pin::{Mock as PinMock, Transaction as PinTransaction, State as PinState};
 use embedded_hal_mock::delay::MockNoop;
+use embedded_hal_mock::pin::{Mock as PinMock, State as PinState, Transaction as PinTransaction};
+use embedded_hal_mock::spi::{Mock as SpiMock, Transaction as SpiTransaction};
 
 #[test]
 fn init_ade7912() {
@@ -17,16 +17,23 @@ fn init_ade7912() {
         // Read TEMPOS (temperature offset)
         SpiTransaction::transfer(vec![0xC4, 0x00], vec![0xC4, 0x5E]),
         // Write LOCK (lock enable)
-        SpiTransaction::transfer(vec![0x50, 0xCA], vec![0x50, 0xCA])
+        SpiTransaction::transfer(vec![0x50, 0xCA], vec![0x50, 0xCA]),
     ];
     let cs_expectations = [
-        PinTransaction::set(PinState::Low), PinTransaction::set(PinState::High),
-        PinTransaction::set(PinState::Low), PinTransaction::set(PinState::High),
-        PinTransaction::set(PinState::Low), PinTransaction::set(PinState::High),
-        PinTransaction::set(PinState::Low), PinTransaction::set(PinState::High),
-        PinTransaction::set(PinState::Low), PinTransaction::set(PinState::High),
-        PinTransaction::set(PinState::Low), PinTransaction::set(PinState::High),
-        PinTransaction::set(PinState::Low), PinTransaction::set(PinState::High)
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
     ];
     let spi = SpiMock::new(&spi_expectations);
     let cs = PinMock::new(&cs_expectations);
@@ -49,15 +56,21 @@ fn init_ade7913() {
         SpiTransaction::transfer(vec![0x70, 0xFF], vec![0x70, 0xFF]),
         SpiTransaction::transfer(vec![0x74, 0x00], vec![0x74, 0xFF]),
         // Write LOCK (lock enable)
-        SpiTransaction::transfer(vec![0x50, 0xCA], vec![0x50, 0xCA])
+        SpiTransaction::transfer(vec![0x50, 0xCA], vec![0x50, 0xCA]),
     ];
     let cs_expectations = [
-        PinTransaction::set(PinState::Low), PinTransaction::set(PinState::High),
-        PinTransaction::set(PinState::Low), PinTransaction::set(PinState::High),
-        PinTransaction::set(PinState::Low), PinTransaction::set(PinState::High),
-        PinTransaction::set(PinState::Low), PinTransaction::set(PinState::High),
-        PinTransaction::set(PinState::Low), PinTransaction::set(PinState::High),
-        PinTransaction::set(PinState::Low), PinTransaction::set(PinState::High)
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
     ];
     let spi = SpiMock::new(&spi_expectations);
     let cs = PinMock::new(&cs_expectations);
@@ -76,14 +89,19 @@ fn init_timeout() {
         SpiTransaction::transfer(vec![0x4c, 0x00], vec![0x4c, 0x01]),
         SpiTransaction::transfer(vec![0x4c, 0x00], vec![0x4c, 0x01]),
         SpiTransaction::transfer(vec![0x4c, 0x00], vec![0x4c, 0x01]),
-        SpiTransaction::transfer(vec![0x4c, 0x00], vec![0x4c, 0x01])
+        SpiTransaction::transfer(vec![0x4c, 0x00], vec![0x4c, 0x01]),
     ];
     let cs_expectations = [
-        PinTransaction::set(PinState::Low), PinTransaction::set(PinState::High),
-        PinTransaction::set(PinState::Low), PinTransaction::set(PinState::High),
-        PinTransaction::set(PinState::Low), PinTransaction::set(PinState::High),
-        PinTransaction::set(PinState::Low), PinTransaction::set(PinState::High),
-        PinTransaction::set(PinState::Low), PinTransaction::set(PinState::High)
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
     ];
     let spi = SpiMock::new(&spi_expectations);
     let cs = PinMock::new(&cs_expectations);
@@ -91,17 +109,21 @@ fn init_timeout() {
     let config = Config::default();
     let calibration = Calibration::default();
     let mut adc = Ade791x::new_ade7912(spi, cs);
-    assert_eq!(adc.init(&mut delay, config, calibration), Err(Error::ResetTimeout));
+    assert_eq!(
+        adc.init(&mut delay, config, calibration),
+        Err(Error::ResetTimeout)
+    );
 }
 
 #[test]
 fn hard_reset() {
     let spi_expectations = [
         // Write hard reset sequence
-        SpiTransaction::transfer(vec![0x00; 8], vec![0x00; 8])
+        SpiTransaction::transfer(vec![0x00; 8], vec![0x00; 8]),
     ];
     let cs_expectations = [
-        PinTransaction::set(PinState::Low), PinTransaction::set(PinState::High)
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
     ];
     let spi = SpiMock::new(&spi_expectations);
     let cs = PinMock::new(&cs_expectations);
@@ -115,11 +137,13 @@ fn soft_reset() {
         // Write LOCK (lock disable)
         SpiTransaction::transfer(vec![0x50, 0x9C], vec![0x50, 0x9C]),
         // Write CONFIG (software reset)
-        SpiTransaction::transfer(vec![0x40, 0x40], vec![0x40, 0x40])
+        SpiTransaction::transfer(vec![0x40, 0x40], vec![0x40, 0x40]),
     ];
     let cs_expectations = [
-        PinTransaction::set(PinState::Low), PinTransaction::set(PinState::High),
-        PinTransaction::set(PinState::Low), PinTransaction::set(PinState::High)
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
     ];
     let spi = SpiMock::new(&spi_expectations);
     let cs = PinMock::new(&cs_expectations);
@@ -138,9 +162,12 @@ fn powerdown() {
         SpiTransaction::transfer(vec![0x50, 0xCA], vec![0x50, 0xCA]),
     ];
     let cs_expectations = [
-        PinTransaction::set(PinState::Low), PinTransaction::set(PinState::High),
-        PinTransaction::set(PinState::Low), PinTransaction::set(PinState::High),
-        PinTransaction::set(PinState::Low), PinTransaction::set(PinState::High)
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
     ];
     let spi = SpiMock::new(&spi_expectations);
     let cs = PinMock::new(&cs_expectations);
@@ -159,9 +186,12 @@ fn wakeup() {
         SpiTransaction::transfer(vec![0x50, 0xCA], vec![0x50, 0xCA]),
     ];
     let cs_expectations = [
-        PinTransaction::set(PinState::Low), PinTransaction::set(PinState::High),
-        PinTransaction::set(PinState::Low), PinTransaction::set(PinState::High),
-        PinTransaction::set(PinState::Low), PinTransaction::set(PinState::High)
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
     ];
     let spi = SpiMock::new(&spi_expectations);
     let cs = PinMock::new(&cs_expectations);
@@ -175,17 +205,23 @@ fn get_raw_measurement() {
         // Burst Read (from IWV to V2WV)
         SpiTransaction::transfer(
             vec![0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
-            vec![0x04, 0x05, 0xEC, 0xDF, 0x06, 0x17, 0x1C, 0x37, 0xBE, 0x97])
+            vec![0x04, 0x05, 0xEC, 0xDF, 0x06, 0x17, 0x1C, 0x37, 0xBE, 0x97],
+        ),
     ];
     let cs_expectations = [
-        PinTransaction::set(PinState::Low), PinTransaction::set(PinState::High)
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
     ];
     let spi = SpiMock::new(&spi_expectations);
     let cs = PinMock::new(&cs_expectations);
     let mut adc = Ade791x::new_ade7912(spi, cs);
     assert_eq!(
         adc.get_raw_measurement().unwrap(),
-        RawMeasurement { iwv: 388319, v1wv: 399132, v2wv: 3653271 }
+        RawMeasurement {
+            iwv: 388319,
+            v1wv: 399132,
+            v2wv: 3653271
+        }
     );
 }
 
@@ -195,10 +231,12 @@ fn get_measurement_ade7912() {
         // Burst Read (from IWV to V2WV)
         SpiTransaction::transfer(
             vec![0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
-            vec![0x04, 0x05, 0xEC, 0xDF, 0x06, 0x17, 0x1C, 0x37, 0xBE, 0x97])
+            vec![0x04, 0x05, 0xEC, 0xDF, 0x06, 0x17, 0x1C, 0x37, 0xBE, 0x97],
+        ),
     ];
     let cs_expectations = [
-        PinTransaction::set(PinState::Low), PinTransaction::set(PinState::High)
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
     ];
     let spi = SpiMock::new(&spi_expectations);
     let cs = PinMock::new(&cs_expectations);
@@ -219,10 +257,12 @@ fn get_measurement_ade7913() {
         // Burst Read (from IWV to V2WV)
         SpiTransaction::transfer(
             vec![0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
-            vec![0x04, 0x05, 0xEC, 0xDF, 0x06, 0x17, 0x1C, 0x37, 0xBE, 0x97])
+            vec![0x04, 0x05, 0xEC, 0xDF, 0x06, 0x17, 0x1C, 0x37, 0xBE, 0x97],
+        ),
     ];
     let cs_expectations = [
-        PinTransaction::set(PinState::Low), PinTransaction::set(PinState::High)
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
     ];
     let spi = SpiMock::new(&spi_expectations);
     let cs = PinMock::new(&cs_expectations);

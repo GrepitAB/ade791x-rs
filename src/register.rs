@@ -23,7 +23,7 @@ pub struct Config {
     /// Selects the bandwidth of the digital low-pass filter of the ADC. When `bw = false`, the
     /// default value, the bandwidth is 3.3 kHz. When `bw = true`, the bandwidth is 2 kHz. The
     /// bandwidth data is for CLKIN = 4.096 MHz and an ADC output frequency of 8 kHz.
-    pub bw: bool
+    pub bw: bool,
 }
 
 /// Represents the possible ADC frequency values.
@@ -34,7 +34,7 @@ pub enum AdcFreqVal {
     KHz8 = 0x00,
     KHz4 = 0x01,
     KHz2 = 0x02,
-    KHz1 = 0x03
+    KHz1 = 0x03,
 }
 
 impl From<u8> for Config {
@@ -45,19 +45,19 @@ impl From<u8> for Config {
             temp_en: (x & 0x08) != 0,
             adc_freq: AdcFreqVal::from((x & 0x30) >> 4),
             swrst: (x & 0x40) != 0,
-            bw: (x & 0x80) != 0
+            bw: (x & 0x80) != 0,
         }
     }
 }
 
 impl From<Config> for u8 {
     fn from(x: Config) -> Self {
-        (x.bw as u8) << 7 |
-            (x.swrst as u8) << 6 |
-            (x.adc_freq as u8) << 4 |
-            (x.temp_en as u8) << 3 |
-            (x.pwrdwn_en as u8) << 2 |
-            (x.clkout_en as u8)
+        (x.bw as u8) << 7
+            | (x.swrst as u8) << 6
+            | (x.adc_freq as u8) << 4
+            | (x.temp_en as u8) << 3
+            | (x.pwrdwn_en as u8) << 2
+            | (x.clkout_en as u8)
     }
 }
 
@@ -67,7 +67,7 @@ impl From<u8> for AdcFreqVal {
             0x00 => AdcFreqVal::KHz8,
             0x01 => AdcFreqVal::KHz4,
             0x02 => AdcFreqVal::KHz2,
-            _ => AdcFreqVal::KHz1
+            _ => AdcFreqVal::KHz1,
         }
     }
 }
@@ -82,7 +82,7 @@ pub struct Status0 {
     pub crc_stat: bool,
     /// If the configuration registers are not protected, this field is `false`. After the
     /// configuration registers are protected, this field is set to `true`.
-    pub ic_prot: bool
+    pub ic_prot: bool,
 }
 
 impl From<u8> for Status0 {
@@ -90,7 +90,7 @@ impl From<u8> for Status0 {
         Status0 {
             reset_on: (x & 0x01) != 0,
             crc_stat: (x & 0x02) != 0,
-            ic_prot: (x & 0x04) != 0
+            ic_prot: (x & 0x04) != 0,
         }
     }
 }
@@ -133,21 +133,21 @@ impl From<u8> for EmiCtrl {
             slot4: (x & (0x01 << 4)) != 0,
             slot5: (x & (0x01 << 5)) != 0,
             slot6: (x & (0x01 << 6)) != 0,
-            slot7: (x & (0x01 << 7)) != 0
+            slot7: (x & (0x01 << 7)) != 0,
         }
     }
 }
 
 impl From<EmiCtrl> for u8 {
     fn from(x: EmiCtrl) -> Self {
-        (x.slot7 as u8) << 7 |
-            (x.slot6 as u8) << 6 |
-            (x.slot5 as u8) << 5 |
-            (x.slot4 as u8) << 4 |
-            (x.slot3 as u8) << 3 |
-            (x.slot2 as u8) << 2 |
-            (x.slot1 as u8) << 1 |
-            (x.slot0 as u8)
+        (x.slot7 as u8) << 7
+            | (x.slot6 as u8) << 6
+            | (x.slot5 as u8) << 5
+            | (x.slot4 as u8) << 4
+            | (x.slot3 as u8) << 3
+            | (x.slot2 as u8) << 2
+            | (x.slot1 as u8) << 1
+            | (x.slot0 as u8)
     }
 }
 
@@ -160,7 +160,7 @@ pub(crate) struct SyncSnap {
     /// When the `snap` field is set to `true` via a broadcast SPI write operation, the internal
     /// counters of the ADE7912/ADE7913 devices in the system are latched. The field clears itself
     /// back to `false` after one CLKIN cycle.
-    pub snap: bool
+    pub snap: bool,
 }
 
 impl From<SyncSnap> for u8 {
@@ -183,7 +183,7 @@ pub(crate) struct BurstRead {
     /// Status struct.
     pub status0: Status0,
     /// Snapshot value of the counter used in synchronization operation.
-    pub cnt_snapshot: u16
+    pub cnt_snapshot: u16,
 }
 
 impl From<[u8; 15]> for BurstRead {
@@ -194,7 +194,7 @@ impl From<[u8; 15]> for BurstRead {
             v2wv: (i32::from_be_bytes(x[6..10].try_into().unwrap()) << 8) >> 8,
             adc_crc: u16::from_be_bytes(x[10..12].try_into().unwrap()),
             status0: Status0::from(x[12]),
-            cnt_snapshot: u16::from_be_bytes(x[13..].try_into().unwrap())
+            cnt_snapshot: u16::from_be_bytes(x[13..].try_into().unwrap()),
         }
     }
 }
@@ -218,7 +218,7 @@ pub(crate) enum Register {
     Counter1,
     EmiCtrl,
     Status1,
-    Tempos
+    Tempos,
 }
 
 impl Register {
@@ -239,18 +239,18 @@ impl Register {
             Register::Counter1 => 0x0D,
             Register::EmiCtrl => 0x0E,
             Register::Status1 => 0x0F,
-            Register::Tempos => 0x18
+            Register::Tempos => 0x18,
         }
     }
 
     /// Returns `true` if the register is read-only, `false` otherwise.
     pub fn is_read_only(&self) -> bool {
-        *self != Register::Config &&
-            *self != Register::Lock &&
-            *self != Register::SyncSnap &&
-            *self != Register::Counter0 &&
-            *self != Register::Counter1 &&
-            *self != Register::EmiCtrl
+        *self != Register::Config
+            && *self != Register::Lock
+            && *self != Register::SyncSnap
+            && *self != Register::Counter0
+            && *self != Register::Counter1
+            && *self != Register::EmiCtrl
     }
 
     /// Returns `true` if the register is write-only, `false` otherwise.
@@ -263,12 +263,12 @@ impl Register {
 #[repr(u8)]
 pub(crate) enum SpiOp {
     Read = 0x04,
-    Write = 0x00
+    Write = 0x00,
 }
 
 /// Represent the possible lock operations and their correspondent codes.
 #[repr(u8)]
 pub(crate) enum LockOp {
     Enable = 0xCA,
-    Disable = 0x9C
+    Disable = 0x9C,
 }

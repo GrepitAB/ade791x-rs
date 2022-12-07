@@ -4,14 +4,14 @@ use super::*;
 /// a polyphase metering system.
 pub struct Ade791x<SPI, CS, const N: usize> {
     spi: SPI,
-    adcs: [ade791x::Ade791x<SPI, CS>; N]
+    adcs: [ade791x::Ade791x<SPI, CS>; N],
 }
 
 impl<SPI, CS, S, P, const N: usize> Ade791x<SPI, CS, N>
-    where
-        SPI: spi::Transfer<u8, Error=S>,
-        CS: OutputPin<Error=P> {
-
+where
+    SPI: spi::Transfer<u8, Error = S>,
+    CS: OutputPin<Error = P>,
+{
     /// Creates a new [`Ade791x`] instance, given the SPI peripheral and an array of the CS output
     /// pins and chips. The newly created instance must be initialized using [`Self::init()`].
     /// # Arguments
@@ -21,7 +21,7 @@ impl<SPI, CS, S, P, const N: usize> Ade791x<SPI, CS, N>
     pub fn new(spi: SPI, adcs: [(CS, Chip); N]) -> Self {
         Self {
             spi,
-            adcs: adcs.map(|(cs, chip)| ade791x::Ade791x::new(cs, chip))
+            adcs: adcs.map(|(cs, chip)| ade791x::Ade791x::new(cs, chip)),
         }
     }
 
@@ -33,15 +33,19 @@ impl<SPI, CS, S, P, const N: usize> Ade791x<SPI, CS, N>
     /// * `calibration` - An array of [`Calibration`] structs containing the calibration values for
     /// the ADCs.
     /// * `emi_ctrl` - An array of [`EmiCtrl`] structs containing the EMI settings for the ADCs.
-    pub fn init(&mut self,
-                delay: &mut dyn DelayMs<u32>,
-                config: [Config; N],
-                calibration: [Calibration; N],
-                emi_ctrl: [EmiCtrl; N]) -> Result<(), Error<S, P>> {
+    pub fn init(
+        &mut self,
+        delay: &mut dyn DelayMs<u32>,
+        config: [Config; N],
+        calibration: [Calibration; N],
+        emi_ctrl: [EmiCtrl; N],
+    ) -> Result<(), Error<S, P>> {
         for i in 0..N {
             self.adcs[i].init(&mut self.spi, delay, config[i], calibration[i], emi_ctrl[i])?;
         }
-        if N > 1 { self.sync()?; }
+        if N > 1 {
+            self.sync()?;
+        }
         self.lock()?;
         Ok(())
     }
@@ -100,11 +104,17 @@ impl<SPI, CS, S, P, const N: usize> Ade791x<SPI, CS, N>
     pub fn adjust_sync(&mut self) -> Result<[i16; N], Error<S, P>> {
         self.unlock()?;
         self.snap()?;
-        let ref_adc_index = self.adcs.iter().position(|adc| adc.is_dr_source()).unwrap_or(0);
+        let ref_adc_index = self
+            .adcs
+            .iter()
+            .position(|adc| adc.is_dr_source())
+            .unwrap_or(0);
         let cref = self.adcs[ref_adc_index].get_cnt_snapshot(&mut self.spi)?;
         let mut drift = [0; N];
         for (i, val) in drift.iter_mut().enumerate() {
-            if i == ref_adc_index { continue; }
+            if i == ref_adc_index {
+                continue;
+            }
             *val = self.adcs[i].adjust_sync(&mut self.spi, cref)?;
         }
         self.lock()?;
@@ -120,7 +130,7 @@ impl<SPI, CS, S, P, const N: usize> Ade791x<SPI, CS, N>
         let mut raw_measurement = [RawMeasurement {
             iwv: 0,
             v1wv: 0,
-            v2wv: 0
+            v2wv: 0,
         }; N];
         for (i, val) in raw_measurement.iter_mut().enumerate() {
             *val = self.adcs[i].get_raw_measurement(&mut self.spi)?;
@@ -136,14 +146,13 @@ impl<SPI, CS, S, P, const N: usize> Ade791x<SPI, CS, N>
         let mut measurement = [Measurement {
             current: 0.0,
             voltage: 0.0,
-            aux: MeasurementAux::Voltage(0.0)
+            aux: MeasurementAux::Voltage(0.0),
         }; N];
         for (i, val) in measurement.iter_mut().enumerate() {
             *val = self.adcs[i].get_measurement(&mut self.spi)?;
         }
         Ok(measurement)
     }
-
 
     /// Performs the synchronization procedure for the ADCs. After this procedure, the internal
     /// counters of the ADCs are aligned. This method should be called only during initialization,
