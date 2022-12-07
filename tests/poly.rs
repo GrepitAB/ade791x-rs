@@ -34,7 +34,7 @@ fn init() {
         SpiTransaction::transfer(vec![0x74, 0x00], vec![0x74, 0x55]),
         // Read TEMPOS (temperature offset)
         SpiTransaction::transfer(vec![0xC4, 0x00], vec![0xC4, 0x6A]),
-        // Write SYNC (sync trigger)
+        // Write SYNC_SNAP (sync trigger)
         SpiTransaction::transfer(vec![0x58, 0x01], vec![0x58, 0x01]),
         // Write LOCK (lock enable)
         SpiTransaction::transfer(vec![0x50, 0xCA], vec![0x50, 0xCA]),
@@ -228,13 +228,13 @@ fn powerdown() {
 #[test]
 fn wakeup() {
     let spi_expectations = [
-        // Write LOCK (lock enable)
+        // Write LOCK (lock disable)
         SpiTransaction::transfer(vec![0x50, 0x9C], vec![0x50, 0x9C]),
         // Write CONFIG (powerdown disable)
         SpiTransaction::transfer(vec![0x40, 0x00], vec![0x40, 0x00]),
         SpiTransaction::transfer(vec![0x40, 0x00], vec![0x40, 0x00]),
         SpiTransaction::transfer(vec![0x40, 0x00], vec![0x40, 0x00]),
-        // Write LOCK (lock disable)
+        // Write LOCK (lock enable)
         SpiTransaction::transfer(vec![0x50, 0xCA], vec![0x50, 0xCA]),
     ];
     let cs_expectations = [
@@ -258,6 +258,53 @@ fn wakeup() {
         ],
     );
     adc.wakeup().unwrap();
+}
+
+#[test]
+fn adjust_sync() {
+    let spi_expectations = [
+        // Write LOCK (lock disable)
+        SpiTransaction::transfer(vec![0x50, 0x9C], vec![0x50, 0x9C]),
+        // Write SYNC_SNAP (snap trigger)
+        SpiTransaction::transfer(vec![0x58, 0x02], vec![0x58, 0x02]),
+        // Burst Read (CNT_SNAPSHOT only)
+        SpiTransaction::transfer(vec![0x3C, 0x00, 0x00], vec![0x3C, 0x01, 0x71]),
+        SpiTransaction::transfer(vec![0x3C, 0x00, 0x00], vec![0x3C, 0x01, 0x72]),
+        SpiTransaction::transfer(vec![0x3C, 0x00, 0x00], vec![0x3C, 0x00, 0x2A]),
+        // Write COUNTER0 (adjust sync)
+        SpiTransaction::transfer(vec![0x60, 0x47], vec![0x60, 0x47]),
+        // Write COUNTER1 (adjust sync)
+        SpiTransaction::transfer(vec![0x68, 0x01], vec![0x68, 0x01]),
+        // Write LOCK (lock enable)
+        SpiTransaction::transfer(vec![0x50, 0xCA], vec![0x50, 0xCA]),
+    ];
+    let cs_expectations = [
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
+        PinTransaction::set(PinState::Low),
+        PinTransaction::set(PinState::High),
+    ];
+    let spi = SpiMock::new(&spi_expectations);
+    let cs0 = PinMock::new(&cs_expectations);
+    let cs1 = PinMock::new(&cs_expectations);
+    let cs2 = PinMock::new(&cs_expectations);
+    let mut adc = poly::Ade791x::new(
+        spi,
+        [
+            (cs0, Chip::ADE7912),
+            (cs1, Chip::ADE7912),
+            (cs2, Chip::ADE7912),
+        ],
+    );
+    assert_eq!(adc.adjust_sync().unwrap(), [0, 1, -327]);
 }
 
 #[test]

@@ -221,7 +221,7 @@ where
     /// # Arguments
     /// * `spi` - The SPI interface implementing the [`spi::Transfer`] trait.
     pub fn get_cnt_snapshot(&mut self, spi: &mut SPI) -> Result<u16, Error<S, P>> {
-        Ok(BurstRead::from(self.burst_read(spi, Register::Iwv, 9)?).cnt_snapshot)
+        Ok(BurstRead::from(self.burst_read(spi, Register::CntSnapshot, 2)?).cnt_snapshot)
     }
 
     /// Returns the latest available measurement from the ADC, without applying any conversion, as
