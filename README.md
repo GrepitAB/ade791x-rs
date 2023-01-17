@@ -40,7 +40,7 @@ The followings are two minimal examples to get readings from the ADC, both in a 
 
 ### Single
 
-```rust
+```rust ignore
 use ade791x::*;
 
 // Initialization
@@ -56,7 +56,7 @@ let measurement = adc.get_measurement().unwrap();
 
 ### Poly
 
-```rust
+```rust ignore
 use ade791x::*;
 
 // Initialization
@@ -102,8 +102,8 @@ let measurement = adc.get_measurement().unwrap();
 
 Licensed under either of
 
-* Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
-* MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+* Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or <http://www.apache.org/licenses/LICENSE-2.0>)
+* MIT license ([LICENSE-MIT](LICENSE-MIT) or <http://opensource.org/licenses/MIT>)
 
 at your option.
 
