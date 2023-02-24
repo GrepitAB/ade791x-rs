@@ -23,7 +23,7 @@ The ADE7912/ADE7913 are isolated, 3-channel Σ-Δ ADCs for polyphase energy mete
 
 ##### Datasheets:
 
-- [ADE7912/ADE7913 (Rev. C)](https://www.analog.com/media/en/technical-documentation/data-sheets/ade7912_7913.pdf)
+- [ADE7912/ADE7913](https://www.analog.com/media/en/technical-documentation/data-sheets/ade7912_7913.pdf)
 
 ## Usage
 
