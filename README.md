@@ -78,7 +78,7 @@ adc.init(delay, config, calibration, emi_ctrl).unwrap();
 
 // Synchronization
 // Execute the following every couple of seconds to ensure that the ADCs are always in sync
-adc.ajust_sync().unwrap();
+adc.adjust_sync().unwrap();
 
 // Measurement
 // Run the following in the DREADY ISR to get measurements as soon as they are ready
